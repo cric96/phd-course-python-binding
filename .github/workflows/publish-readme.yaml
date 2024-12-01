@@ -16,7 +16,7 @@ jobs:
           mv README.md index.md
 
       - name: Convert Markdown into PDF
-        uses: KoharaKazuya/marp-cli-action@v2
+        uses: KoharaKazuya/marp-cli-action@v3
         with:
           generate-html: true
           generate-pdf: true
