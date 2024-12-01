@@ -18,9 +18,9 @@ jobs:
           generate-pdf: true
 
       - name: Save outputs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: output
+          name: path
           path: ./output
 
       - name: Deploy to GitHub Pages
