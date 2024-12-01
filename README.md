@@ -3,7 +3,7 @@ marp: true
 ---
 <!--
 theme: gaia
-
+footer: ''
 -->
 
 # TODO
@@ -12,6 +12,7 @@ theme: gaia
 :microphone: **Speaker**: _Gianluca Aguzzi_, University of Bologna
 :email: Email: gianluca.aguzzi@unibo.it
 :globe_with_meridians: Personal site: [https://cric96.github.io/](https://cric96.github.io/)
+PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](https://cric96.github.io/phd-course-python-binding/)
 
 ---
  
