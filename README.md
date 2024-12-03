@@ -7,7 +7,7 @@ footer: ''
 -->
 
 # TODO
-## Multi-plaform binding with Python!
+## Multi-platform binding with Python!
 
 :microphone: **Speaker**: _Gianluca Aguzzi_, University of Bologna
 :email: Email: gianluca.aguzzi@unibo.it
