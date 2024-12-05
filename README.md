@@ -5,8 +5,7 @@ marp: true
 footer: ''
 -->
 
-# TODO
-## Multi-platform binding with Python!
+# Creating Python Bindings for Native Code
 
 :microphone: **Speaker**: _Gianluca Aguzzi_, University of Bologna
 :email: Email: gianluca.aguzzi@unibo.it
