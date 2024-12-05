@@ -42,7 +42,7 @@ def print_banner(msg):
 
 
 @invoke.task()
-def build_cmult(c, path=None):
+def build_library(c, path=None):
     """Build the shared library for the sample C code"""
     # Moving this type hint into signature causes an error (???)
     c: invoke.Context
@@ -53,15 +53,15 @@ def build_cmult(c, path=None):
             # Using c.cd didn't work with paths that have spaces :/
             path = f'"{path}vcvars32.bat" x86'  # Enter the VS venv
             path += f'&& cd "{os.getcwd()}"'  # Change to current dir
-            path += "&& cl /LD ./native/cmult.c"  # Compile
+            path += "&& cl /LD ./native/library.c"  # Compile
             # Uncomment line below, to suppress stdout
             # path = path.replace("&&", " >nul &&") + " >nul"
             c.run(path)
     else:
         print_banner("Building C Library")
-        cmd = "gcc -c -Wall -Werror -fpic ./native/cmult.c"
+        cmd = "gcc -c -Wall -Werror -fpic ./native/library.c -o ./native/library.o"
         invoke.run(cmd)
-        invoke.run("gcc -shared -o ./native/libcmult.so ./native/cmult.o")
+        invoke.run("gcc -shared -o ./native/shared.so ./native/library.o")
         print("* Complete")
 
 
@@ -87,14 +87,14 @@ def test_ctypes_cpp(c):
         invoke.run("python3 ctypes_cpp_test.py", pty=True)
 
 
-@invoke.task(build_cmult)
+@invoke.task(build_library)
 def build_cffi(c):
     """Build the CFFI Python bindings"""
     print_banner("Building CFFI Module")
     ffi = cffi.FFI()
 
     this_dir = pathlib.Path().resolve()  + "/native"
-    h_file_name = this_dir / "cmult.h"
+    h_file_name = this_dir / "library.h"
     with open(h_file_name) as h_file:
         # cffi does not like our preprocessor directives, so we remove them
         lns = h_file.read().splitlines()
@@ -108,10 +108,10 @@ def build_cffi(c):
         # is necessary. We need to include the .h files, though, because behind
         # the scenes cffi generates a .c file which contains a Python-friendly
         # wrapper around each of the functions.
-        '#include "cmult.h"',
+        '#include "library.h"',
         # The important thing is to include the pre-built lib in the list of
         # libraries we are linking against:
-        libraries=["cmult"],
+        libraries=["library"],
         library_dirs=[this_dir.as_posix()],
         extra_link_args=["-Wl,-rpath,."],
     )
@@ -185,7 +185,7 @@ def test_cython(c):
 
 @invoke.task(
     clean,
-    build_cmult,
+    build_library,
     build_cppmult,
     test_ctypes,
     test_ctypes_cpp,

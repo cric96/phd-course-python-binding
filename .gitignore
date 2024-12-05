@@ -1,3 +1,5 @@
 base-binding-python/env
 base-binding-python/.env
 
+base-binding-python/native/*.so
+base-binding-python/native/*.o

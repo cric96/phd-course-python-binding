@@ -10,14 +10,14 @@ footer: ''
 :microphone: **Speaker**: _Gianluca Aguzzi_, University of Bologna
 :email: Email: gianluca.aguzzi@unibo.it
 :globe_with_meridians: Personal site: [https://cric96.github.io/](https://cric96.github.io/)
-PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](https://cric96.github.io/phd-course-python-binding/)
+PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](https://cric96.github.io/phd-course-python-binding/index.pdf)
 
 ---
  
 # Outline
 - How to handle (conceptually) Python-native interaction
-- Main alternatives in the current landscape
-- A guided example with [raylib](https://www.raylib.com/index.html)
+- Main alternatives in the current landscape (see [/base-binding-python](/base-binding-python/))
+- A guided example with [raylib](https://www.raylib.com/index.html) (see [/raylib-binding-python](/raylib-binding-python/))
 
 ---
 
@@ -91,6 +91,56 @@ Python offers several ways to create bindings with native code, from completely 
 
 ---
 
+# How to run
+
+- Create a virtual environment
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+- Install the dependencies
+```bash
+pip install -r requirements.txt
+```
+- Build the shared library
+```bash
+invoke build-libray
+```
+- Run the Python script
+```bash
+python ctypes_test.py
+```
+---
+
+# On Invoke
+
+- [**Invoke**](http://www.pyinvoke.org/) is a Python library for managing tasks
+- It's a simple way to define and run tasks
+- It's similar to Makefiles, but in Python
+- It's a good way to automate tasks in Python projects
+- There are other alternatives like [**Ninja**](https://ninja-build.org/)
+
+---
+# How to use Invoke
+
+- Install Invoke
+```bash
+pip install invoke
+```
+- Create a file called `tasks.py` with the following content:
+```python
+from invoke import task
+
+@task
+def hello(c):
+    print("Hello, world!")
+```
+- Run the task
+```bash
+invoke hello
+```
+
+---
 # Load a Shared Library
 
 Ctypes needs to load a shared library to access C functions
@@ -163,4 +213,76 @@ move_point.restype = None
 
 p = Point(1, 2.0)
 move_point(p, 3, 4.0)
+```
+
+---
+
+# Pass pointer to functions
+
+You can also pass pointers to C functions
+```c
+void move_point(Point *p, int dx, float dy) {
+    p->x += dx;
+    p->y += dy;
+}
+```
+
+In Python you can call it like this:
+```python
+move_point = lib.move_point
+```
+
+---
+
+# Ctypes Summary
+
+- Pros:
+    - Part of the Python standard library
+    - No need to write C code
+    - No need to compile anything
+- Cons:
+    - Low level API
+    - Limited functionality (Class? Templates?)
+
+---
+
+# CFFI
+
+- Modern alternative to ctypes with an auto-generated API
+- Two main modes for creating bindings:
+    - ABI mode: Call C functions directly
+    - API mode: Use a C header file to generate a Python API
+
+CFFI need to be installed with pip:
+```bash
+pip install cffi
+```
+
+---
+
+# CFFI Module Creation
+- CFFI creates a **full Python module**
+- Steps to create CFFI bindings:
+    1. Write Python code for bindings
+    2. Generate loadable module
+    3. Import and use the module
+
+---
+
+## Writing Bindings
+```python
+import cffi
+ffi = cffi.FFI()
+
+# Process header file
+ffi.cdef(header_content)
+
+# Configure source
+ffi.set_source(
+    "module_name",
+    '#include "library.h"',
+    libraries=["library"],
+    library_dirs=[dir_path],
+    extra_link_args=["-Wl,-rpath,."]
+)
 ```
