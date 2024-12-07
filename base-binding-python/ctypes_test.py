@@ -1,7 +1,7 @@
 import ctypes
 
 # Load the shared library into ctypes
-lib = ctypes.CDLL("./native/shared.so")
+lib = ctypes.CDLL("./native/liblibrary.so")
 
 # Define the function signature for the C++ function
 lib.cmult.argtypes = [ctypes.c_int, ctypes.c_float]

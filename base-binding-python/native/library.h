@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 // Function that multiplies an integer by a float
 float cmult(int int_param, float float_param);
 

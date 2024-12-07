@@ -3,3 +3,4 @@ cffi
 Cython
 pybind11
 pycparser
+setuptools
