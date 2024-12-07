@@ -3,3 +3,11 @@ base-binding-python/.env
 
 base-binding-python/native/*.so
 base-binding-python/native/*.o
+base-binding-python/*.so
+base-binding-python/*.cpp
+
+raylib-python/env
+raylib-python/.env
+.idea
+__pycache__/
+env/

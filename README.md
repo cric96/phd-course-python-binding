@@ -17,6 +17,7 @@ PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](http
 # Outline
 - How to handle (conceptually) Python-native interaction
 - Main alternatives in the current landscape (see [/base-binding-python](/base-binding-python/))
+    - For more details, please refer to this [guide](https://realpython.com/python-bindings-overview/)
 - A guided example with [raylib](https://www.raylib.com/index.html) (see [/raylib-binding-python](/raylib-binding-python/))
 
 ---
@@ -36,6 +37,7 @@ PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](http
 - It's important to define what you want to expose to the Python side
 - Typically, native code **isn't** Pythonic, so you need to create a Pythonic interface
 - **Flow**: Native :arrow_right: Direct Python Binding :arrow_right: Pythonic Interface
+    - Sometimes, the Python Binding is created automatically
 
 
 ---
@@ -151,7 +153,6 @@ import ctypes
 lib = ctypes.CDLL('path/to/shared/library.so')
 
 # Find a library by name
-
 lib = ctypes.CDLL(find_library("library"))
 
 ``` 
@@ -230,17 +231,23 @@ void move_point(Point *p, int dx, float dy) {
 In Python you can call it like this:
 ```python
 move_point = lib.move_point
+move_point.argtypes = [ctypes.POINTER(Point), ctypes.c_int, ctypes.c_float]
+move_point.restype = None
+point = Point(1, 2.0)
+move_point(ctypes.byref(point), 3, 4.0)
 ```
+:exclamation: it is important to use `ctypes.byref` to pass a pointer to the struct :exclamation:
+
 
 ---
 
 # Ctypes Summary
 
-- Pros:
+- **Pros** :fire::
     - Part of the Python standard library
     - No need to write C code
     - No need to compile anything
-- Cons:
+- **Cons** :cry::
     - Low level API
     - Limited functionality (Class? Templates?)
 
@@ -285,4 +292,230 @@ ffi.set_source(
     library_dirs=[dir_path],
     extra_link_args=["-Wl,-rpath,."]
 )
+```
+
+---
+
+# Generating Module
+```python
+ffi.compile()
+```
+
+- This will generate a shared library that can be imported in Python using the module name given in `set_source` :fire:
+
+- You don't need to write any manual marshalling code, CFFI will handle it for you :boom:
+
+- Unfortunately, CFFI doesn't support C++ :cry:
+    - Typical workaround: Create a C wrapper around the C++ code
+
+--- 
+
+# Python wrapper
+
+- Starting from the CFFI module, you can create a Python wrapper
+
+
+```python
+
+class PointWrapper:
+    def __init__(self, x=0, y=0):
+        # Allocate memory for a C Point structure
+        self._c_point = ffi.new("Point *")
+        self.x = x
+        self.y = y
+
+    ## Utility methods
+
+    # Functions from Point
+    def move(self, dx, dy): #[...]
+    
+    def move_in_place(self, dx, dy): #[...]
+
+    def __del__(self):
+        ffi.release(self._c_point)  # Explicitly free memory
+```
+
+---
+
+# Alternatives?
+- **Cython** :rocket:: A language that makes writing C extensions for Python as easy as Python itself
+    - :zap: Static compiler that converts Python code to C
+    - :chart_with_upwards_trend: Excellent performance for numerical computations
+    - :handshake: Can handle both Python and C code seamlessly
+    - :heavy_plus_sign: Direct support for C++ (unlike CFFI)
+    - :microscope: Popular in scientific computing (NumPy, SciPy)
+    - :warning: Steeper learning curve than ctypes/CFFI
+
+---
+
+## How it works?
+- Write a `.pyx` file with a Python-like syntax
+- Compile it with Cython
+- Import the compiled module in Python
+
+---
+
+## Example
+```python
+# point.pyx
+cdef struct Point:
+    int x
+    float y
+
+cdef class PyPoint:
+    cdef Point p
+
+    def __init__(self, x=0, y=0.0):
+        self.p.x = x
+        self.p.y = y
+
+    def move(self, dx, dy):
+        self.p.x += dx
+        self.p.y += dy
+
+    @property
+    def x(self):
+        return self.p.x
+
+    @property
+    def y(self):
+        return self.p.y
+```
+
+---
+
+And compile with:
+```python
+# setup.py
+from setuptools import setup
+from Cython.Build import cythonize
+
+setup(
+    ext_modules=cythonize("point.pyx")
+)
+```
+
+or do it manually
+
+```bash
+invoke.run("cython --cplus -3 library.pyx")
+invoke.run("g++ -shared -std=c++11 -fPIC $(python3-config --includes) -o library.so library.cpp")
+```
+
+---
+
+# Cython Summary
+- **Pros** :fire::
+    - Excellent performance :rocket:
+    - Direct support for C++ :heavy_plus_sign::heavy_plus_sign:
+    - Seamless integration with Python :snake:
+- **Cons** :cry::
+    - Steeper learning curve :mountain:
+        - Requires to learn ``another'' language :book:
+    - Requires compilation step :hammer_and_wrench:
+    - Not as easy as ctypes/CFFI :confused:
+
+---
+
+# SWIG
+- Simplified Wrapper and Interface Generator: [](https://www.swig.org/)
+- A code generator for creating bindings in different languages
+    - Supports Python, Scala,
+- **Pros** :fire::
+    - Supports multiple languages :globe_with_meridians:
+    - Can generate bindings automatically :gear:
+    - Can handle C++ code :heavy_plus_sign:
+- **Cons** :cry::
+    - Complex to use :construction:
+    - Not as popular as ctypes/CFFI/Cython :chart_with_downwards_trend:
+
+---
+
+# Raylib Example :video_game: :joystick:
+
+- [**Raylib**](https://www.raylib.com/index.html) is a simple and easy-to-use library to learn videogame programming :rocket:
+
+- Written in **C** with focus on clean and efficient API :gear:
+
+- We will create a **Python binding** for Raylib using ctypes :snake:
+
+- Next steps you can take :arrow_forward::
+    - Create a rich **Pythonic interface** :sparkles:
+    - Choose another library to create bindings for :package:
+    - Create a binding using **Cython** or **SWIG** :wrench:
+
+---
+
+# First level: Native Interface :construction_worker:
+
+- **First step**: Create Python binding for Raylib using ctypes :snake:
+
+- Start by selecting core functions to expose :dart::
+    - :window: Window management
+    - :pencil2: Drawing simple text
+    - :broom: Clear the screen functionality
+
+- Keep it simple and focused! :bulb:
+
+---
+
+# How to?
+- Look at the [Raylib documentation](https://www.raylib.com/cheatsheet/cheatsheet.html): 
+- Load the shared library
+```python
+try: 
+    lib = ctypes.CDLL(ctypes.util.find_library("raylib"))
+except OSError:
+    print("Error loading the shared library, try to install it!")
+    sys.exit(1)
+```
+
+- Extract some main structures
+```python
+class Color(ctypes.Structure):
+    _fields_ = [
+        ("r", ctypes.c_ubyte), 
+        ("g", ctypes.c_ubyte), 
+        ("b", ctypes.c_ubyte), 
+        ("a", ctypes.c_ubyte)
+    ]
+```
+
+---
+
+# How to? :wrench:
+
+- Define the functions you want to expose with **ctypes**
+    - It's **recommended** to explicitly define parameters and return types
+```python
+init_window = lib.InitWindow
+init_window.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_char_p]
+init_window.restype = None
+```
+
+- Why Types? :thinking:
+
+    - :shield: Prevents errors in marshalling/unmarshalling
+    - :recycle: Helps avoid memory leaks
+    - :book: Makes code self-documenting and more readable
+    - :warning: **Remember**: Clear type definitions are crucial for reliable native bindings!
+---
+
+# Simple example
+```python
+width = 800
+height = 450
+fps = 60
+speed = 10
+init_window(width, height, b"Hello, World!")
+set_target_fps(fps)
+
+move = 0
+while not window_should_close():
+    begin_drawing()
+    clear_background(BLACK)
+    draw_text(b"Hello, World!", move, 10, 40, LIGHTGRAY)
+    end_drawing()
+    move = (move + speed) % width
+close_window()
 ```
