@@ -20,7 +20,11 @@ PDF slides @ <a href="https://cric96.github.io/phd-course-python-binding/index.p
 <h1>Outline</h1>
 <ul>
 <li>How to handle (conceptually) Python-native interaction</li>
-<li>Main alternatives in the current landscape (see <a href="/base-binding-python/">/base-binding-python</a>)</li>
+<li>Main alternatives in the current landscape (see <a href="/base-binding-python/">/base-binding-python</a>)
+<ul>
+<li>For more details, please refer to this <a href="https://realpython.com/python-bindings-overview/">guide</a></li>
+</ul>
+</li>
 <li>A guided example with <a href="https://www.raylib.com/index.html">raylib</a> (see <a href="/raylib-binding-python/">/raylib-binding-python</a>)</li>
 </ul>
 </section>
@@ -50,7 +54,11 @@ PDF slides @ <a href="https://cric96.github.io/phd-course-python-binding/index.p
 <ul>
 <li>It's important to define what you want to expose to the Python side</li>
 <li>Typically, native code <strong>isn't</strong> Pythonic, so you need to create a Pythonic interface</li>
-<li><strong>Flow</strong>: Native <img class="emoji" draggable="false" alt="➡️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/27a1.svg" data-marp-twemoji=""/> Direct Python Binding <img class="emoji" draggable="false" alt="➡️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/27a1.svg" data-marp-twemoji=""/> Pythonic Interface</li>
+<li><strong>Flow</strong>: Native <img class="emoji" draggable="false" alt="➡️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/27a1.svg" data-marp-twemoji=""/> Direct Python Binding <img class="emoji" draggable="false" alt="➡️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/27a1.svg" data-marp-twemoji=""/> Pythonic Interface
+<ul>
+<li>Sometimes, the Python Binding is created automatically</li>
+</ul>
+</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5">
@@ -198,7 +206,6 @@ PDF slides @ <a href="https://cric96.github.io/phd-course-python-binding/index.p
 lib = ctypes.CDLL(<span class="hljs-string">&#x27;path/to/shared/library.so&#x27;</span>)
 
 <span class="hljs-comment"># Find a library by name</span>
-
 lib = ctypes.CDLL(find_library(<span class="hljs-string">&quot;library&quot;</span>))
 
 </code></pre>
@@ -258,19 +265,24 @@ move_point(p, <span class="hljs-number">3</span>, <span class="hljs-number">4.0<
 </code></pre>
 <p>In Python you can call it like this:</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">move_point = lib.move_point
+move_point.argtypes = [ctypes.POINTER(Point), ctypes.c_int, ctypes.c_float]
+move_point.restype = <span class="hljs-literal">None</span>
+point = Point(<span class="hljs-number">1</span>, <span class="hljs-number">2.0</span>)
+move_point(ctypes.byref(point), <span class="hljs-number">3</span>, <span class="hljs-number">4.0</span>)
 </code></pre>
+<p><img class="emoji" draggable="false" alt="❗" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2757.svg" data-marp-twemoji=""/> it is important to use <code>ctypes.byref</code> to pass a pointer to the struct <img class="emoji" draggable="false" alt="❗" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2757.svg" data-marp-twemoji=""/></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17">
 <h1>Ctypes Summary</h1>
 <ul>
-<li>Pros:
+<li><strong>Pros</strong> <img class="emoji" draggable="false" alt="🔥" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f525.svg" data-marp-twemoji=""/>:
 <ul>
 <li>Part of the Python standard library</li>
 <li>No need to write C code</li>
 <li>No need to compile anything</li>
 </ul>
 </li>
-<li>Cons:
+<li><strong>Cons</strong> <img class="emoji" draggable="false" alt="😢" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f622.svg" data-marp-twemoji=""/>:
 <ul>
 <li>Low level API</li>
 <li>Limited functionality (Class? Templates?)</li>
@@ -322,6 +334,270 @@ ffi.set_source(
     library_dirs=[dir_path],
     extra_link_args=[<span class="hljs-string">&quot;-Wl,-rpath,.&quot;</span>]
 )
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="21">
+<h1>Generating Module</h1>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">ffi.<span class="hljs-built_in">compile</span>()
+</code></pre>
+<ul>
+<li>
+<p>This will generate a shared library that can be imported in Python using the module name given in <code>set_source</code> <img class="emoji" draggable="false" alt="🔥" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f525.svg" data-marp-twemoji=""/></p>
+</li>
+<li>
+<p>You don't need to write any manual marshalling code, CFFI will handle it for you <img class="emoji" draggable="false" alt="💥" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4a5.svg" data-marp-twemoji=""/></p>
+</li>
+<li>
+<p>Unfortunately, CFFI doesn't support C++ <img class="emoji" draggable="false" alt="😢" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f622.svg" data-marp-twemoji=""/></p>
+<ul>
+<li>Typical workaround: Create a C wrapper around the C++ code</li>
+</ul>
+</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="22">
+<h1>Python wrapper</h1>
+<ul>
+<li>Starting from the CFFI module, you can create a Python wrapper</li>
+</ul>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">PointWrapper</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x=<span class="hljs-number">0</span>, y=<span class="hljs-number">0</span></span>):
+        <span class="hljs-comment"># Allocate memory for a C Point structure</span>
+        self._c_point = ffi.new(<span class="hljs-string">&quot;Point *&quot;</span>)
+        self.x = x
+        self.y = y
+
+    <span class="hljs-comment">## Utility methods</span>
+
+    <span class="hljs-comment"># Functions from Point</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">move</span>(<span class="hljs-params">self, dx, dy</span>): <span class="hljs-comment">#[...]</span>
+    
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">move_in_place</span>(<span class="hljs-params">self, dx, dy</span>): <span class="hljs-comment">#[...]</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__del__</span>(<span class="hljs-params">self</span>):
+        ffi.release(self._c_point)  <span class="hljs-comment"># Explicitly free memory</span>
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="23">
+<h1>Alternatives?</h1>
+<ul>
+<li><strong>Cython</strong> <img class="emoji" draggable="false" alt="🚀" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" data-marp-twemoji=""/>: A language that makes writing C extensions for Python as easy as Python itself
+<ul>
+<li><img class="emoji" draggable="false" alt="⚡" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" data-marp-twemoji=""/> Static compiler that converts Python code to C</li>
+<li><img class="emoji" draggable="false" alt="📈" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c8.svg" data-marp-twemoji=""/> Excellent performance for numerical computations</li>
+<li><img class="emoji" draggable="false" alt="🤝" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f91d.svg" data-marp-twemoji=""/> Can handle both Python and C code seamlessly</li>
+<li><img class="emoji" draggable="false" alt="➕" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2795.svg" data-marp-twemoji=""/> Direct support for C++ (unlike CFFI)</li>
+<li><img class="emoji" draggable="false" alt="🔬" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f52c.svg" data-marp-twemoji=""/> Popular in scientific computing (NumPy, SciPy)</li>
+<li><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/> Steeper learning curve than ctypes/CFFI</li>
+</ul>
+</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="24">
+<h2>How it works?</h2>
+<ul>
+<li>Write a <code>.pyx</code> file with a Python-like syntax</li>
+<li>Compile it with Cython</li>
+<li>Import the compiled module in Python</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="25">
+<h2>Example</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-comment"># point.pyx</span>
+cdef struct Point:
+    <span class="hljs-built_in">int</span> x
+    <span class="hljs-built_in">float</span> y
+
+cdef <span class="hljs-keyword">class</span> <span class="hljs-title class_">PyPoint</span>:
+    cdef Point p
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x=<span class="hljs-number">0</span>, y=<span class="hljs-number">0.0</span></span>):
+        self.p.x = x
+        self.p.y = y
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">move</span>(<span class="hljs-params">self, dx, dy</span>):
+        self.p.x += dx
+        self.p.y += dy
+
+<span class="hljs-meta">    @property</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">x</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> self.p.x
+
+<span class="hljs-meta">    @property</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">y</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> self.p.y
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="26">
+<p>And compile with:</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-comment"># setup.py</span>
+<span class="hljs-keyword">from</span> setuptools <span class="hljs-keyword">import</span> setup
+<span class="hljs-keyword">from</span> Cython.Build <span class="hljs-keyword">import</span> cythonize
+
+setup(
+    ext_modules=cythonize(<span class="hljs-string">&quot;point.pyx&quot;</span>)
+)
+</code></pre>
+<p>or do it manually</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash">invoke.run(<span class="hljs-string">&quot;cython --cplus -3 library.pyx&quot;</span>)
+invoke.run(<span class="hljs-string">&quot;g++ -shared -std=c++11 -fPIC <span class="hljs-subst">$(python3-config --includes)</span> -o library.so library.cpp&quot;</span>)
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="27">
+<h1>Cython Summary</h1>
+<ul>
+<li><strong>Pros</strong> <img class="emoji" draggable="false" alt="🔥" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f525.svg" data-marp-twemoji=""/>:
+<ul>
+<li>Excellent performance <img class="emoji" draggable="false" alt="🚀" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" data-marp-twemoji=""/></li>
+<li>Direct support for C++ <img class="emoji" draggable="false" alt="➕" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2795.svg" data-marp-twemoji=""/><img class="emoji" draggable="false" alt="➕" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2795.svg" data-marp-twemoji=""/></li>
+<li>Seamless integration with Python <img class="emoji" draggable="false" alt="🐍" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f40d.svg" data-marp-twemoji=""/></li>
+</ul>
+</li>
+<li><strong>Cons</strong> <img class="emoji" draggable="false" alt="😢" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f622.svg" data-marp-twemoji=""/>:
+<ul>
+<li>Steeper learning curve <img class="emoji" draggable="false" alt="⛰️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26f0.svg" data-marp-twemoji=""/>
+<ul>
+<li>Requires to learn ``another'' language <img class="emoji" draggable="false" alt="📖" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d6.svg" data-marp-twemoji=""/></li>
+</ul>
+</li>
+<li>Requires compilation step <img class="emoji" draggable="false" alt="🛠️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e0.svg" data-marp-twemoji=""/></li>
+<li>Not as easy as ctypes/CFFI <img class="emoji" draggable="false" alt="😕" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f615.svg" data-marp-twemoji=""/></li>
+</ul>
+</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="28">
+<h1>SWIG</h1>
+<ul>
+<li>Simplified Wrapper and Interface Generator: <a href="https://www.swig.org/"></a></li>
+<li>A code generator for creating bindings in different languages
+<ul>
+<li>Supports Python, Scala,</li>
+</ul>
+</li>
+<li><strong>Pros</strong> <img class="emoji" draggable="false" alt="🔥" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f525.svg" data-marp-twemoji=""/>:
+<ul>
+<li>Supports multiple languages <img class="emoji" draggable="false" alt="🌐" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" data-marp-twemoji=""/></li>
+<li>Can generate bindings automatically <img class="emoji" draggable="false" alt="⚙️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2699.svg" data-marp-twemoji=""/></li>
+<li>Can handle C++ code <img class="emoji" draggable="false" alt="➕" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2795.svg" data-marp-twemoji=""/></li>
+</ul>
+</li>
+<li><strong>Cons</strong> <img class="emoji" draggable="false" alt="😢" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f622.svg" data-marp-twemoji=""/>:
+<ul>
+<li>Complex to use <img class="emoji" draggable="false" alt="🚧" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a7.svg" data-marp-twemoji=""/></li>
+<li>Not as popular as ctypes/CFFI/Cython <img class="emoji" draggable="false" alt="📉" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c9.svg" data-marp-twemoji=""/></li>
+</ul>
+</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="29">
+<h1>Raylib Example <img class="emoji" draggable="false" alt="🎮" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ae.svg" data-marp-twemoji=""/> <img class="emoji" draggable="false" alt="🕹️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f579.svg" data-marp-twemoji=""/></h1>
+<ul>
+<li>
+<p><a href="https://www.raylib.com/index.html"><strong>Raylib</strong></a> is a simple and easy-to-use library to learn videogame programming <img class="emoji" draggable="false" alt="🚀" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" data-marp-twemoji=""/></p>
+</li>
+<li>
+<p>Written in <strong>C</strong> with focus on clean and efficient API <img class="emoji" draggable="false" alt="⚙️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2699.svg" data-marp-twemoji=""/></p>
+</li>
+<li>
+<p>We will create a <strong>Python binding</strong> for Raylib using ctypes <img class="emoji" draggable="false" alt="🐍" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f40d.svg" data-marp-twemoji=""/></p>
+</li>
+<li>
+<p>Next steps you can take <img class="emoji" draggable="false" alt="▶️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/25b6.svg" data-marp-twemoji=""/>:</p>
+<ul>
+<li>Create a rich <strong>Pythonic interface</strong> <img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2728.svg" data-marp-twemoji=""/></li>
+<li>Choose another library to create bindings for <img class="emoji" draggable="false" alt="📦" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4e6.svg" data-marp-twemoji=""/></li>
+<li>Create a binding using <strong>Cython</strong> or <strong>SWIG</strong> <img class="emoji" draggable="false" alt="🔧" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f527.svg" data-marp-twemoji=""/></li>
+</ul>
+</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="30">
+<h1>First level: Native Interface <img class="emoji" draggable="false" alt="👷" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f477.svg" data-marp-twemoji=""/></h1>
+<ul>
+<li>
+<p><strong>First step</strong>: Create Python binding for Raylib using ctypes <img class="emoji" draggable="false" alt="🐍" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f40d.svg" data-marp-twemoji=""/></p>
+</li>
+<li>
+<p>Start by selecting core functions to expose <img class="emoji" draggable="false" alt="🎯" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3af.svg" data-marp-twemoji=""/>:</p>
+<ul>
+<li><img class="emoji" draggable="false" alt="🪟" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa9f.svg" data-marp-twemoji=""/> Window management</li>
+<li><img class="emoji" draggable="false" alt="✏️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/270f.svg" data-marp-twemoji=""/> Drawing simple text</li>
+<li><img class="emoji" draggable="false" alt="🧹" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f9.svg" data-marp-twemoji=""/> Clear the screen functionality</li>
+</ul>
+</li>
+<li>
+<p>Keep it simple and focused! <img class="emoji" draggable="false" alt="💡" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4a1.svg" data-marp-twemoji=""/></p>
+</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="31">
+<h1>How to?</h1>
+<ul>
+<li>Look at the <a href="https://www.raylib.com/cheatsheet/cheatsheet.html">Raylib documentation</a>:</li>
+<li>Load the shared library</li>
+</ul>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">try</span>: 
+    lib = ctypes.CDLL(ctypes.util.find_library(<span class="hljs-string">&quot;raylib&quot;</span>))
+<span class="hljs-keyword">except</span> OSError:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Error loading the shared library, try to install it!&quot;</span>)
+    sys.exit(<span class="hljs-number">1</span>)
+</code></pre>
+<ul>
+<li>Extract some main structures</li>
+</ul>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Color</span>(ctypes.Structure):
+    _fields_ = [
+        (<span class="hljs-string">&quot;r&quot;</span>, ctypes.c_ubyte), 
+        (<span class="hljs-string">&quot;g&quot;</span>, ctypes.c_ubyte), 
+        (<span class="hljs-string">&quot;b&quot;</span>, ctypes.c_ubyte), 
+        (<span class="hljs-string">&quot;a&quot;</span>, ctypes.c_ubyte)
+    ]
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="32">
+<h1>How to? <img class="emoji" draggable="false" alt="🔧" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f527.svg" data-marp-twemoji=""/></h1>
+<ul>
+<li>Define the functions you want to expose with <strong>ctypes</strong>
+<ul>
+<li>It's <strong>recommended</strong> to explicitly define parameters and return types</li>
+</ul>
+</li>
+</ul>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">init_window = lib.InitWindow
+init_window.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_char_p]
+init_window.restype = <span class="hljs-literal">None</span>
+</code></pre>
+<ul>
+<li>
+<p>Why Types? <img class="emoji" draggable="false" alt="🤔" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f914.svg" data-marp-twemoji=""/></p>
+<ul>
+<li><img class="emoji" draggable="false" alt="🛡️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" data-marp-twemoji=""/> Prevents errors in marshalling/unmarshalling</li>
+<li><img class="emoji" draggable="false" alt="♻️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/267b.svg" data-marp-twemoji=""/> Helps avoid memory leaks</li>
+<li><img class="emoji" draggable="false" alt="📖" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d6.svg" data-marp-twemoji=""/> Makes code self-documenting and more readable</li>
+<li><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/> <strong>Remember</strong>: Clear type definitions are crucial for reliable native bindings!</li>
+</ul>
+</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="33">
+<h1>Simple example</h1>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">width = <span class="hljs-number">800</span>
+height = <span class="hljs-number">450</span>
+fps = <span class="hljs-number">60</span>
+speed = <span class="hljs-number">10</span>
+init_window(width, height, <span class="hljs-string">b&quot;Hello, World!&quot;</span>)
+set_target_fps(fps)
+
+move = <span class="hljs-number">0</span>
+<span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> window_should_close():
+    begin_drawing()
+    clear_background(BLACK)
+    draw_text(<span class="hljs-string">b&quot;Hello, World!&quot;</span>, move, <span class="hljs-number">10</span>, <span class="hljs-number">40</span>, LIGHTGRAY)
+    end_drawing()
+    move = (move + speed) % width
+close_window()
 </code></pre>
 </section>
 <script>!function(){"use strict";const t={h1:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"1"},style:"display: block; font-size: 2em; margin-block-start: 0.67em; margin-block-end: 0.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h2:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"2"},style:"display: block; font-size: 1.5em; margin-block-start: 0.83em; margin-block-end: 0.83em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h3:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"3"},style:"display: block; font-size: 1.17em; margin-block-start: 1em; margin-block-end: 1em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h4:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"4"},style:"display: block; margin-block-start: 1.33em; margin-block-end: 1.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h5:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"5"},style:"display: block; font-size: 0.83em; margin-block-start: 1.67em; margin-block-end: 1.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h6:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"6"},style:"display: block; font-size: 0.67em; margin-block-start: 2.33em; margin-block-end: 2.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},span:{proto:()=>HTMLSpanElement},pre:{proto:()=>HTMLElement,style:"display: block; font-family: monospace; white-space: pre; margin: 1em 0; --marp-auto-scaling-white-space: pre;"}},e="data-marp-auto-scaling-wrapper",i="data-marp-auto-scaling-svg",n="data-marp-auto-scaling-container";class s extends HTMLElement{constructor(){super(),this.svgPreserveAspectRatio="xMinYMid meet";const t=t=>([e])=>{const{width:i,height:n}=e.contentRect;this[t]={width:i,height:n},this.updateSVGRect()};this.attachShadow({mode:"open"}),this.containerObserver=new ResizeObserver(t("containerSize")),this.wrapperObserver=new ResizeObserver(((...e)=>{t("wrapperSize")(...e),this.flushSvgDisplay()}))}static get observedAttributes(){return["data-downscale-only"]}connectedCallback(){var t,s,o,r,a;this.shadowRoot.innerHTML=`\n<style>\n  svg[${i}] { display: block; width: 100%; height: auto; vertical-align: top; }\n  span[${n}] { display: table; white-space: var(--marp-auto-scaling-white-space, nowrap); width: max-content; }\n</style>\n<div ${e}>\n  <svg part="svg" ${i}>\n    <foreignObject><span ${n}><slot></slot></span></foreignObject>\n  </svg>\n</div>\n    `.split(/\n\s*/).join(""),this.wrapper=null!==(t=this.shadowRoot.querySelector(`div[${e}]`))&&void 0!==t?t:void 0;const l=this.svg;this.svg=null!==(o=null===(s=this.wrapper)||void 0===s?void 0:s.querySelector(`svg[${i}]`))&&void 0!==o?o:void 0,this.svg!==l&&(this.svgComputedStyle=this.svg?window.getComputedStyle(this.svg):void 0),this.container=null!==(a=null===(r=this.svg)||void 0===r?void 0:r.querySelector(`span[${n}]`))&&void 0!==a?a:void 0,this.observe()}disconnectedCallback(){this.svg=void 0,this.svgComputedStyle=void 0,this.wrapper=void 0,this.container=void 0,this.observe()}attributeChangedCallback(){this.observe()}flushSvgDisplay(){const{svg:t}=this;t&&(t.style.display="inline",requestAnimationFrame((()=>{t.style.display=""})))}observe(){this.containerObserver.disconnect(),this.wrapperObserver.disconnect(),this.wrapper&&this.wrapperObserver.observe(this.wrapper),this.container&&this.containerObserver.observe(this.container),this.svgComputedStyle&&this.observeSVGStyle(this.svgComputedStyle)}observeSVGStyle(t){const e=()=>{const i=(()=>{const e=t.getPropertyValue("--preserve-aspect-ratio");if(e)return e.trim();return`x${(({textAlign:t,direction:e})=>{if(t.endsWith("left"))return"Min";if(t.endsWith("right"))return"Max";if("start"===t||"end"===t){let i="rtl"===e;return"end"===t&&(i=!i),i?"Max":"Min"}return"Mid"})(t)}YMid meet`})();i!==this.svgPreserveAspectRatio&&(this.svgPreserveAspectRatio=i,this.updateSVGRect()),t===this.svgComputedStyle&&requestAnimationFrame(e)};e()}updateSVGRect(){var t,e,i,n,s,o,r;let a=Math.ceil(null!==(e=null===(t=this.containerSize)||void 0===t?void 0:t.width)&&void 0!==e?e:0);const l=Math.ceil(null!==(n=null===(i=this.containerSize)||void 0===i?void 0:i.height)&&void 0!==n?n:0);void 0!==this.dataset.downscaleOnly&&(a=Math.max(a,null!==(o=null===(s=this.wrapperSize)||void 0===s?void 0:s.width)&&void 0!==o?o:0));const c=null===(r=this.svg)||void 0===r?void 0:r.querySelector(":scope > foreignObject");if(null==c||c.setAttribute("width",`${a}`),null==c||c.setAttribute("height",`${l}`),this.svg&&(this.svg.setAttribute("viewBox",`0 0 ${a} ${l}`),this.svg.setAttribute("preserveAspectRatio",this.svgPreserveAspectRatio),this.svg.style.height=a<=0||l<=0?"0":""),this.container){const t=this.svgPreserveAspectRatio.toLowerCase();this.container.style.marginLeft=t.startsWith("xmid")||t.startsWith("xmax")?"auto":"0",this.container.style.marginRight=t.startsWith("xmi")?"auto":"0"}}}const o=(t,{attrs:e={},style:i})=>class extends t{constructor(...t){super(...t);for(const[t,i]of Object.entries(e))this.hasAttribute(t)||this.setAttribute(t,i);this.attachShadow({mode:"open"})}static get observedAttributes(){return["data-auto-scaling"]}connectedCallback(){this._update()}attributeChangedCallback(){this._update()}_update(){const t=i?`<style>:host { ${i} }</style>`:"";let e="<slot></slot>";const{autoScaling:n}=this.dataset;if(void 0!==n){e=`<marp-auto-scaling exportparts="svg:auto-scaling" ${"downscale-only"===n?"data-downscale-only":""}>${e}</marp-auto-scaling>`}this.shadowRoot.innerHTML=t+e}};let r;const a=Symbol();let l;const c="marpitSVGPolyfill:setZoomFactor,",d=Symbol(),g=Symbol();const h=()=>{const t="Apple Computer, Inc."===navigator.vendor,e=t?[u]:[],i={then:e=>(t?(async()=>{if(void 0===l){const t=document.createElement("canvas");t.width=10,t.height=10;const e=t.getContext("2d"),i=new Image(10,10),n=new Promise((t=>{i.addEventListener("load",(()=>t()))}));i.crossOrigin="anonymous",i.src="data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%201%201%22%3E%3CforeignObject%20width%3D%221%22%20height%3D%221%22%20requiredExtensions%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Cdiv%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%20style%3D%22width%3A%201px%3B%20height%3A%201px%3B%20background%3A%20red%3B%20position%3A%20relative%22%3E%3C%2Fdiv%3E%3C%2FforeignObject%3E%3C%2Fsvg%3E",await n,e.drawImage(i,0,0),l=e.getImageData(5,5,1,1).data[3]<128}return l})().then((t=>{null==e||e(t?[u]:[])})):null==e||e([]),i)};return Object.assign(e,i)};let p,m;function u(t){const e="object"==typeof t&&t.target||document,i="object"==typeof t?t.zoom:t;window[g]||(Object.defineProperty(window,g,{configurable:!0,value:!0}),document.body.style.zoom=1.0001,document.body.offsetHeight,document.body.style.zoom=1,window.addEventListener("message",(({data:t,origin:e})=>{if(e===window.origin)try{if(t&&"string"==typeof t&&t.startsWith(c)){const[,e]=t.split(","),i=Number.parseFloat(e);Number.isNaN(i)||(m=i)}}catch(t){console.error(t)}})));let n=!1;Array.from(e.querySelectorAll("svg[data-marpit-svg]"),(t=>{var e,s,o,r;t.style.transform||(t.style.transform="translateZ(0)");const a=i||m||t.currentScale||1;p!==a&&(p=a,n=a);const l=t.getBoundingClientRect(),{length:c}=t.children;for(let i=0;i<c;i+=1){const n=t.children[i];if(n.getScreenCTM){const t=n.getScreenCTM();if(t){const i=null!==(s=null===(e=n.x)||void 0===e?void 0:e.baseVal.value)&&void 0!==s?s:0,c=null!==(r=null===(o=n.y)||void 0===o?void 0:o.baseVal.value)&&void 0!==r?r:0,d=n.children.length;for(let e=0;e<d;e+=1){const s=n.children[e];if("SECTION"===s.tagName){const{style:e}=s;e.transformOrigin||(e.transformOrigin=`${-i}px ${-c}px`),e.transform=`scale(${a}) matrix(${t.a}, ${t.b}, ${t.c}, ${t.d}, ${t.e-l.left}, ${t.f-l.top}) translateZ(0.0001px)`;break}}}}}})),!1!==n&&Array.from(e.querySelectorAll("iframe"),(({contentWindow:t})=>{null==t||t.postMessage(`${c}${n}`,"null"===window.origin?"*":window.origin)}))}function v({once:t=!1,target:e=document}={}){const i=function(t=document){if(t[d])return t[d];let e=!0;const i=()=>{e=!1,delete t[d]};Object.defineProperty(t,d,{configurable:!0,value:i});let n=[],s=!1;(async()=>{try{n=await h()}finally{s=!0}})();const o=()=>{for(const e of n)e({target:t});s&&0===n.length||e&&window.requestAnimationFrame(o)};return o(),i}(e);return t?(i(),()=>{}):i}p=1,m=void 0;const b=Symbol(),w=(e=document)=>{if("undefined"==typeof window)throw new Error("Marp Core's browser script is valid only in browser context.");if(((e=document)=>{const i=window[a];i||customElements.define("marp-auto-scaling",s);for(const n of Object.keys(t)){const s=`marp-${n}`,a=t[n].proto();null!=r||(r=!!document.createElement("div",{is:"marp-auto-scaling"}).outerHTML.startsWith("<div is")),r&&a!==HTMLElement?i||customElements.define(s,o(a,{style:t[n].style}),{extends:n}):(i||customElements.define(s,o(HTMLElement,t[n])),e.querySelectorAll(`${n}[is="${s}"]`).forEach((t=>{t.outerHTML=t.outerHTML.replace(new RegExp(`^<${n}`,"i"),`<${s}`).replace(new RegExp(`</${n}>$`,"i"),`</${s}>`)})))}window[a]=!0})(e),e[b])return e[b];const i=v({target:e}),n=()=>{i(),delete e[b]},l=Object.assign(n,{cleanup:n,update:()=>w(e)});return Object.defineProperty(e,b,{configurable:!0,value:l}),l},y=document.currentScript;w(y?y.getRootNode():document)}();
