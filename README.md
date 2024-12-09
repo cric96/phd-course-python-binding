@@ -543,13 +543,13 @@ close_window()
 
 # Assignment
 
-- *Goal*: Create a binding between two different platforms
-    - **Native** (C/C++) and **Python**; or **Native** and **Kotlin**; or **Python** and **Java**
+- **Goal**: Develop bindings between two different platforms, such as:
+    - **Native** (C/C++) :arrow_right: **Python**, or **Native** :arrow_right: **Kotlin**, or **Python** :arrow_right: **Java**
 
-- *Requirements*:
-    - **Native** code with at least one function and one structure (minimum): look at [awesome c libraries](https://github.com/oz123/awesome-c) 
-    - Create an idiomatic interface in the target language
+- **Requirements**:
+    - **Native** code containing at least one function and one structure. Refer to [awesome C libraries](https://github.com/oz123/awesome-c) for examples.
+    - Create an idiomatic interface in the target language.
 
-- *Deliverables*:
-    - A **GitHub repository** with the code and a report which includes (**at least**):
-        - **Design choices** what makes your binding idiomatic
+- **Deliverables**:
+    - A **GitHub repository** containing *the code* and a *report* that includes (at least):
+        - **Design choices** explaining how your binding is idiomatic
