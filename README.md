@@ -547,9 +547,9 @@ close_window()
     - **Native** (C/C++) :arrow_right: **Python**, or **Native** :arrow_right: **Kotlin**, or **Python** :arrow_right: **Java**
 
 - **Requirements**:
-    - **Native** code containing at least one function and one structure. Refer to [awesome C libraries](https://github.com/oz123/awesome-c) for examples.
+    - **Wrapped** code containing at least one function and one type definition (class/interface). Refer to [awesome C libraries](https://github.com/oz123/awesome-c) for examples.
     - Create an idiomatic interface in the target language.
 
 - **Deliverables**:
-    - A **GitHub repository** containing *the code* and a *report* that includes (at least):
+    - A **GitHub repository** containing *the code* and a *report*  (README.md) that includes (at least):
         - **Design choices** explaining what makes the interface idiomatic
