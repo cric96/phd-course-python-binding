@@ -552,4 +552,4 @@ close_window()
 
 - **Deliverables**:
     - A **GitHub repository** containing *the code* and a *report* that includes (at least):
-        - **Design choices** explaining how your binding is idiomatic
+        - **Design choices** explaining what makes the interface idiomatic
