@@ -628,16 +628,19 @@ init_window.restype = <span class="hljs-literal">None</span>
 height = <span class="hljs-number">450</span>
 fps = <span class="hljs-number">60</span>
 speed = <span class="hljs-number">10</span>
+font_size = <span class="hljs-number">40</span>
+text_y = <span class="hljs-number">10</span>
+
 init_window(width, height, <span class="hljs-string">b&quot;Hello, World!&quot;</span>)
 set_target_fps(fps)
 
-move = <span class="hljs-number">0</span>
+dx = <span class="hljs-number">0</span>
 <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> window_should_close():
     begin_drawing()
     clear_background(BLACK)
-    draw_text(<span class="hljs-string">b&quot;Hello, World!&quot;</span>, move, <span class="hljs-number">10</span>, <span class="hljs-number">40</span>, LIGHTGRAY)
+    draw_text(<span class="hljs-string">b&quot;Hello, World!&quot;</span>, dx, text_y, font_size, LIGHTGRAY)
     end_drawing()
-    move = (move + speed) % width
+    dx = (dx + speed) % width
 close_window()
 </code></pre>
 </section>
