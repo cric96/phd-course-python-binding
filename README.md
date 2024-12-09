@@ -539,3 +539,17 @@ while not window_should_close():
     move = (move + speed) % width
 close_window()
 ```
+---
+
+# Assignment
+
+- *Goal*: Create a binding between two different platforms
+    - **Native** (C/C++) and **Python**; or **Native** and **Kotlin**; or **Python** and **Java**
+
+- *Requirements*:
+    - **Native** code with at least one function and one structure (minimum): look at [awesome c libraries](https://github.com/oz123/awesome-c) 
+    - Create an idiomatic interface in the target language
+
+- *Deliverables*:
+    - A **GitHub repository** with the code and a report which includes (**at least**):
+        - **Design choices** what makes your binding idiomatic
