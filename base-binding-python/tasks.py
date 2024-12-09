@@ -73,17 +73,6 @@ def test_ctypes(c):
         invoke.run("python3 ctypes_test.py", pty=True)
 
 
-@invoke.task()
-def test_ctypes_cpp(c):
-    """Run the script to test ctypes"""
-    print_banner("Testing ctypes Module for C++")
-    # pty and python3 didn't work for me (win).
-    if on_win:
-        invoke.run("python ctypes_cpp_test.py")
-    else:
-        invoke.run("python3 ctypes_cpp_test.py", pty=True)
-
-
 @invoke.task(build_library)
 def build_cffi(c):
     """Build the CFFI Python bindings"""
@@ -121,6 +110,7 @@ def build_cython(c):
     if on_win:
         invoke.run('cl /LD /I "%INCLUDE%" library.cpp /Fe:library.pyd')
     else:
+        # -fPIC $(python3-config --includes) is used to generate position-independent code and include Python headers
         invoke.run("g++ -shared -std=c++11 -fPIC $(python3-config --includes) -o library.so library.cpp")
     print("* Build complete")
 

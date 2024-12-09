@@ -36,14 +36,33 @@ PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](http
 # What to Expose?
 - It's important to define what you want to expose to the Python side
 - Typically, native code **isn't** Pythonic, so you need to create a Pythonic interface
-- **Flow**: Native :arrow_right: Direct Python Binding :arrow_right: Pythonic Interface
+- General guideline:
+    - Native interface :arrow_right: language-specific binding :arrow_right: Idiomatic (language-based) interface
+    - In Python, **Flow**: Native :arrow_right: Direct Python Binding :arrow_right: Pythonic Interface 
     - Sometimes, the Python Binding is created automatically
 
+---
+# What "Idiomatic" Means
+
+- **Idiomatic Code**
+    - Code that is natural to the target programming language
+    - Follows design principles and community best practices
+        - Namely, idioms (common patterns) and conventions (coding style)
+
+- **Examples**
+    - *Effective Java*: [Effective Java](https://www.amazon.com/Effective-Java-Joshua-Bloch/dp/0134685997)
+    - *The Zen of Python*: [The Zen of Python](https://www.python.org/dev/peps/pep-0020/)
+
+- **Different Languages, Different Styles**
+    - **Python**: Readability, simplicity, elegance
+    - **C**: Performance, control, efficiency
+
+- **Creating an Interface** :arrow_right: Map between idiomatic styles
 
 ---
 
-# Managing Different Types
-- **Marshalling**: the process of transforming data to pass between the two platforms
+# Managing Different (Platform) Types
+- **Marshalling**: the process of transforming data to pass between the two *platforms*
 
 - Two mindsets:
     - C :arrow_right: Focused on performance
@@ -51,6 +70,7 @@ PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](http
 - Examples:
     - Integers: C has int, short, long, long long; Python has int
     - Floats: C has float, double; Python has float
+- In the *binding* layer, you need to handle these differences
 
 ---
 
@@ -343,7 +363,7 @@ class PointWrapper:
     - :chart_with_upwards_trend: Excellent performance for numerical computations
     - :handshake: Can handle both Python and C code seamlessly
     - :heavy_plus_sign: Direct support for C++ (unlike CFFI)
-    - :microscope: Popular in scientific computing (NumPy, SciPy)
+    - :microscope: Popular in scientific computing ([NumPy](https://github.com/numpy/numpy), [SciPy](https://scipy.org/))
     - :warning: Steeper learning curve than ctypes/CFFI
 
 ---
@@ -439,10 +459,9 @@ invoke.run("g++ -shared -std=c++11 -fPIC $(python3-config --includes) -o library
 
 - We will create a **Python binding** for Raylib using ctypes :snake:
 
-- Next steps you can take :arrow_forward::
-    - Create a rich **Pythonic interface** :sparkles:
-    - Choose another library to create bindings for :package:
-    - Create a binding using **Cython** or **SWIG** :wrench:
+### Requirements
+- Raylib installed on your system
+    - follow the instructions [here](https://www.raylib.com/index.html)
 
 ---
 
@@ -455,7 +474,8 @@ invoke.run("g++ -shared -std=c++11 -fPIC $(python3-config --includes) -o library
     - :pencil2: Drawing simple text
     - :broom: Clear the screen functionality
 
-- Keep it simple and focused! :bulb:
+- Design principles in mind: **KISSéé (Keep It Simple, Stupid) :bulb:
+    - map the main functions and structure from Raylib to Python
 
 ---
 
