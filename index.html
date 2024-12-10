@@ -645,6 +645,60 @@ close_window()
 </code></pre>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="35">
+<h1>Second level: Pythonic Interface</h1>
+<ul>
+<li>
+<p>Once we have the basic bindings, we can design a more Pythonic interface leveraging</p>
+<ul>
+<li><strong>Classes</strong> to encapsulate data and behavior</li>
+<li>First-class functions to simplify the API</li>
+</ul>
+</li>
+<li>
+<p>In this case, I create the following classes:</p>
+<ul>
+<li><strong>Window</strong>: to manage the window
+<ul>
+<li>Everything about window management</li>
+</ul>
+</li>
+<li><strong>Node</strong>: to manage the drawing
+<ul>
+<li>Everything about drawing and structure</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="36">
+<h1>Overall Picture</h1>
+<p><img src="https://www.plantuml.com/plantuml/png/RL8zR-Cm3DtrAuWiPn_Wu6uD3eSKtOiE1JeQYaJR0cGga6WaQTh_NfjMFjpMWyt7H_8zqTecrf67tYlZTKhm52p2MS7u78iIDk281PqMoEjJ6BW-_fHSLcfhwxsEI5pCdureb4AEs68iockbwPotXRmlTHygMtl18sThF8QYiZin9aarWRXExWqNwbdWRifZy27cCV6kihsBTpc-DZrhGW_dAtvrPCCXJpauozr2jKFNThn8iMEFNomdv7hOMyrODrGqj85c8CCkKFdDl98Vy--zgcGFDvYzWLA_uA5j8xPwcW25eyIeBOG6JEZt8JcP34s8kKUJbHsh6OQg4ZXwD85OEqfAvPDMrV-vQK5EJeIIfOxKa331oane9OQiTTH27o92H2_EaZZGbwJsBh4pa0oIZYxaazsypBS6_gpNVuKJmSp9HHdfYVsjr1R93ht_1000" alt="Picture" /></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="37">
+<h1>Pythonic example</h1>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">width = <span class="hljs-number">800</span>
+height = <span class="hljs-number">450</span>
+font_size = <span class="hljs-number">40</span>
+text_y = <span class="hljs-number">10</span>
+dx = <span class="hljs-number">10</span>
+
+panel = dsl.Panel()
+text = dsl.Text(<span class="hljs-string">&quot;Hello, World!&quot;</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, font_size, LIGHTGRAY)
+text2 = dsl.Text(<span class="hljs-string">&quot;Hello, World!&quot;</span>, <span class="hljs-number">0</span>, font_size + text_y, font_size, LIGHTGRAY)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>():
+    panel.x = (panel.x + random.randint(<span class="hljs-number">0</span>, dx)) % width
+    panel.y = (panel.y + random.randint(<span class="hljs-number">0</span>, dx)) % height
+
+panel.add_children([text, text2])
+window = dsl.Window(width, height, <span class="hljs-string">&quot;Hello, World!&quot;</span>, panel)
+window.update_fn = update
+window.render()
+
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="38">
 <h1>Assignment</h1>
 <ul>
 <li>
