@@ -315,6 +315,30 @@ move_point(ctypes.byref(point), <span class="hljs-number">3</span>, <span class=
 <p><img class="emoji" draggable="false" alt="❗" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2757.svg" data-marp-twemoji=""/> it is important to use <code>ctypes.byref</code> to pass a pointer to the struct <img class="emoji" draggable="false" alt="❗" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2757.svg" data-marp-twemoji=""/></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18">
+<h1>On Memory Management</h1>
+<ul>
+<li>
+<p>The type definitions created via <code>ctypes</code> are <strong>managed</strong> by Python</p>
+</li>
+<li>
+<p>When the object is no longer needed, Python will automatically free the memory</p>
+</li>
+<li>
+<p>However, if a C function allocates memory, you need to free it manually</p>
+<ul>
+<li>Otherwise, you will have a memory leak</li>
+</ul>
+</li>
+<li>
+<p>Typical solution: expose a function to free the memory</p>
+</li>
+</ul>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">free_point</span><span class="hljs-params">(Point *p)</span> {
+    <span class="hljs-built_in">free</span>(p);
+}
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19">
 <h1>Ctypes Summary</h1>
 <ul>
 <li><strong>Pros</strong> <img class="emoji" draggable="false" alt="🔥" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f525.svg" data-marp-twemoji=""/>:
@@ -332,7 +356,7 @@ move_point(ctypes.byref(point), <span class="hljs-number">3</span>, <span class=
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20">
 <h1>CFFI</h1>
 <ul>
 <li>Modern alternative to ctypes with an auto-generated API</li>
@@ -347,7 +371,7 @@ move_point(ctypes.byref(point), <span class="hljs-number">3</span>, <span class=
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash">pip install cffi
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="21">
 <h1>CFFI Module Creation</h1>
 <ul>
 <li>CFFI creates a <strong>full Python module</strong></li>
@@ -360,7 +384,7 @@ move_point(ctypes.byref(point), <span class="hljs-number">3</span>, <span class=
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="21">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="22">
 <h2>Writing Bindings</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">import</span> cffi
 ffi = cffi.FFI()
@@ -378,7 +402,7 @@ ffi.set_source(
 )
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="22">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="23">
 <h1>Generating Module</h1>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">ffi.<span class="hljs-built_in">compile</span>()
 </code></pre>
@@ -397,7 +421,7 @@ ffi.set_source(
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="23">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="24">
 <h1>Python wrapper</h1>
 <ul>
 <li>Starting from the CFFI module, you can create a Python wrapper</li>
@@ -421,7 +445,7 @@ ffi.set_source(
         ffi.release(self._c_point)  <span class="hljs-comment"># Explicitly free memory</span>
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="24">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="25">
 <h1>Alternatives?</h1>
 <ul>
 <li><strong>Cython</strong> <img class="emoji" draggable="false" alt="🚀" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" data-marp-twemoji=""/>: A language that makes writing C extensions for Python as easy as Python itself
@@ -436,7 +460,7 @@ ffi.set_source(
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="25">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="26">
 <h2>How it works?</h2>
 <ul>
 <li>Write a <code>.pyx</code> file with a Python-like syntax</li>
@@ -444,7 +468,7 @@ ffi.set_source(
 <li>Import the compiled module in Python</li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="26">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="27">
 <h2>Example</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-comment"># point.pyx</span>
 cdef struct Point:
@@ -471,7 +495,7 @@ cdef <span class="hljs-keyword">class</span> <span class="hljs-title class_">PyP
         <span class="hljs-keyword">return</span> self.p.y
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="27">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="28">
 <p>And compile with:</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-comment"># setup.py</span>
 <span class="hljs-keyword">from</span> setuptools <span class="hljs-keyword">import</span> setup
@@ -486,7 +510,7 @@ setup(
 invoke.run(<span class="hljs-string">&quot;g++ -shared -std=c++11 -fPIC <span class="hljs-subst">$(python3-config --includes)</span> -o library.so library.cpp&quot;</span>)
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="28">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="29">
 <h1>Cython Summary</h1>
 <ul>
 <li><strong>Pros</strong> <img class="emoji" draggable="false" alt="🔥" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f525.svg" data-marp-twemoji=""/>:
@@ -509,7 +533,7 @@ invoke.run(<span class="hljs-string">&quot;g++ -shared -std=c++11 -fPIC <span cl
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="29">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="30">
 <h1>SWIG</h1>
 <ul>
 <li>Simplified Wrapper and Interface Generator: <a href="https://www.swig.org/"></a></li>
@@ -533,7 +557,7 @@ invoke.run(<span class="hljs-string">&quot;g++ -shared -std=c++11 -fPIC <span cl
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="30">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="31">
 <h1>How can decide which platform to use?</h1>
 <ul>
 <li><strong>ctypes</strong> <img class="emoji" draggable="false" alt="➡️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/27a1.svg" data-marp-twemoji=""/> You need a quick and dirty solution
@@ -554,7 +578,7 @@ invoke.run(<span class="hljs-string">&quot;g++ -shared -std=c++11 -fPIC <span cl
 <li><strong>SWIG</strong>: <img class="emoji" draggable="false" alt="➡️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/27a1.svg" data-marp-twemoji=""/> You need to support multiple languages</li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="31">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="32">
 <h1>A Concrete Binding Example: Raylib <img class="emoji" draggable="false" alt="🎮" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ae.svg" data-marp-twemoji=""/> <img class="emoji" draggable="false" alt="🕹️" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f579.svg" data-marp-twemoji=""/></h1>
 <ul>
 <li>
@@ -576,7 +600,7 @@ invoke.run(<span class="hljs-string">&quot;g++ -shared -std=c++11 -fPIC <span cl
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="32">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="33">
 <h1>First level: Native Interface <img class="emoji" draggable="false" alt="👷" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f477.svg" data-marp-twemoji=""/></h1>
 <ul>
 <li>
@@ -598,7 +622,7 @@ invoke.run(<span class="hljs-string">&quot;g++ -shared -std=c++11 -fPIC <span cl
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="33">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="34">
 <h1>How to?</h1>
 <ul>
 <li>Look at the <a href="https://www.raylib.com/cheatsheet/cheatsheet.html">Raylib documentation</a>:</li>
@@ -622,7 +646,7 @@ invoke.run(<span class="hljs-string">&quot;g++ -shared -std=c++11 -fPIC <span cl
     ]
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="34">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="35">
 <h1>How to? <img class="emoji" draggable="false" alt="🔧" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f527.svg" data-marp-twemoji=""/></h1>
 <ul>
 <li>Define the functions you want to expose with <strong>ctypes</strong>
@@ -647,7 +671,7 @@ init_window.restype = <span class="hljs-literal">None</span>
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="35">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="36">
 <h1>Simple example</h1>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">width = <span class="hljs-number">800</span>
 height = <span class="hljs-number">450</span>
@@ -669,7 +693,7 @@ dx = <span class="hljs-number">0</span>
 close_window()
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="36">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="37">
 <h1>Second level: Pythonic Interface</h1>
 <ul>
 <li>
@@ -696,11 +720,11 @@ close_window()
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="37">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="38">
 <h1>Overall Picture</h1>
 <p><img src="https://www.plantuml.com/plantuml/png/RL8zR-Cm3DtrAuWiPn_Wu6uD3eSKtOiE1JeQYaJR0cGga6WaQTh_NfjMFjpMWyt7H_8zqTecrf67tYlZTKhm52p2MS7u78iIDk281PqMoEjJ6BW-_fHSLcfhwxsEI5pCdureb4AEs68iockbwPotXRmlTHygMtl18sThF8QYiZin9aarWRXExWqNwbdWRifZy27cCV6kihsBTpc-DZrhGW_dAtvrPCCXJpauozr2jKFNThn8iMEFNomdv7hOMyrODrGqj85c8CCkKFdDl98Vy--zgcGFDvYzWLA_uA5j8xPwcW25eyIeBOG6JEZt8JcP34s8kKUJbHsh6OQg4ZXwD85OEqfAvPDMrV-vQK5EJeIIfOxKa331oane9OQiTTH27o92H2_EaZZGbwJsBh4pa0oIZYxaazsypBS6_gpNVuKJmSp9HHdfYVsjr1R93ht_1000" alt="Picture" /></p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="38">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="39">
 <h1>Pythonic example</h1>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">width = <span class="hljs-number">800</span>
 height = <span class="hljs-number">450</span>
@@ -723,7 +747,7 @@ window.render()
 
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="39">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="40">
 <h1>Assignment</h1>
 <ul>
 <li>
