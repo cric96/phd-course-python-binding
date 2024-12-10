@@ -24,18 +24,23 @@ PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](http
 
 # Creating Bindings from Native Code
 ## Agenda :thought_balloon:
-- What do you want to **expose**?
-    - Low level or Pythonic?
-- How to **manage** different types?
-    - Marshalling?
+
 - How to handle **memory**?
     - GC vs Manual Management
+
+- How to **manage** different types?
+    - Marshalling?
+- What do you want to **expose**?
+    - Low level or Pythonic?
+
+Typically, the first two points are managed by the binding library, while the last one is up to the developer 
+
 
 ---
 
 # What to Expose?
 - It's important to define what you want to expose to the Python side
-- Typically, native code **isn't** Pythonic, so you need to create a Pythonic interface
+- Typically, native code **isn't** Pythonic, so you need to create a Pythonic interface (**idiomatic**)
 - General guideline:
     - Native interface :arrow_right: language-specific binding :arrow_right: Idiomatic (language-based) interface
     - In Python, **Flow**: Native :arrow_right: Direct Python Binding :arrow_right: Pythonic Interface 
@@ -47,7 +52,7 @@ PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](http
 - **Idiomatic Code**
     - Code that is natural to the target programming language
     - Follows design principles and community best practices
-        - Namely, idioms (common patterns) and conventions (coding style)
+        - Namely, *idioms* (common patterns) and *conventions* (coding style)
 
 - **Examples**
     - *Effective Java*: [Effective Java](https://www.amazon.com/Effective-Java-Joshua-Bloch/dp/0134685997)
@@ -70,7 +75,7 @@ PDF slides @ [https://cric96.github.io/phd-course-python-binding/index.pdf](http
 - Examples:
     - Integers: C has int, short, long, long long; Python has int
     - Floats: C has float, double; Python has float
-- In the *binding* layer, you need to handle these differences
+- In the *binding* layer, you *may* need to handle these differences
 
 ---
 
@@ -221,7 +226,7 @@ class Point(ctypes.Structure):
 You can pass structs to C functions
 ```c
 void move_point(Point p, int dx, float dy) {
-    p-x += dx;
+    p.x += dx;
     p.y += dy;
 }
 ```
@@ -440,7 +445,7 @@ invoke.run("g++ -shared -std=c++11 -fPIC $(python3-config --includes) -o library
 # SWIG
 - Simplified Wrapper and Interface Generator: [](https://www.swig.org/)
 - A code generator for creating bindings in different languages
-    - Supports Python, Scala,
+    - It supports Python, Scala, Java, etc.
 - **Pros** :fire::
     - Supports multiple languages :globe_with_meridians:
     - Can generate bindings automatically :gear:
@@ -451,7 +456,18 @@ invoke.run("g++ -shared -std=c++11 -fPIC $(python3-config --includes) -o library
 
 ---
 
-# Raylib Example :video_game: :joystick:
+# How can decide which platform to use?
+
+- **ctypes** :arrow_right: You need a quick and dirty solution
+    - you don't want to wrap the entire library
+- **cffi**: :arrow_right: You want an automatic solution with a clean API
+    - you have a C header file
+- **Cython**: :arrow_right: You need performance and C++ support
+    - you are willing to learn a new language
+- **SWIG**: :arrow_right: You need to support multiple languages
+
+---
+# A Concrete Binding Example: Raylib :video_game: :joystick:
 
 - [**Raylib**](https://www.raylib.com/index.html) is a simple and easy-to-use library to learn videogame programming :rocket:
 
@@ -474,7 +490,7 @@ invoke.run("g++ -shared -std=c++11 -fPIC $(python3-config --includes) -o library
     - :pencil2: Drawing simple text
     - :broom: Clear the screen functionality
 
-- Design principles in mind: **KISSéé (Keep It Simple, Stupid) :bulb:
+- Design principles in mind: **KISS** (Keep It Simple, Stupid) :bulb:
     - map the main functions and structure from Raylib to Python
 
 ---
