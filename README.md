@@ -543,7 +543,49 @@ while not window_should_close():
 close_window()
 ```
 ---
+# Second level: Pythonic Interface
 
+- Once we have the basic bindings, we can design a more Pythonic interface leveraging
+    - **Classes** to encapsulate data and behavior
+    - First-class functions to simplify the API
+
+- In this case, I create the following classes:
+    - **Window**: to manage the window
+        - Everything about window management
+    - **Node**: to manage the drawing
+        - Everything about drawing and structure
+        
+
+---
+# Overall Picture
+![Picture](https://www.plantuml.com/plantuml/png/RL8zR-Cm3DtrAuWiPn_Wu6uD3eSKtOiE1JeQYaJR0cGga6WaQTh_NfjMFjpMWyt7H_8zqTecrf67tYlZTKhm52p2MS7u78iIDk281PqMoEjJ6BW-_fHSLcfhwxsEI5pCdureb4AEs68iockbwPotXRmlTHygMtl18sThF8QYiZin9aarWRXExWqNwbdWRifZy27cCV6kihsBTpc-DZrhGW_dAtvrPCCXJpauozr2jKFNThn8iMEFNomdv7hOMyrODrGqj85c8CCkKFdDl98Vy--zgcGFDvYzWLA_uA5j8xPwcW25eyIeBOG6JEZt8JcP34s8kKUJbHsh6OQg4ZXwD85OEqfAvPDMrV-vQK5EJeIIfOxKa331oane9OQiTTH27o92H2_EaZZGbwJsBh4pa0oIZYxaazsypBS6_gpNVuKJmSp9HHdfYVsjr1R93ht_1000)
+
+---
+
+# Pythonic example
+```python
+width = 800
+height = 450
+font_size = 40
+text_y = 10
+dx = 10
+
+panel = dsl.Panel()
+text = dsl.Text("Hello, World!", 0, 0, font_size, LIGHTGRAY)
+text2 = dsl.Text("Hello, World!", 0, font_size + text_y, font_size, LIGHTGRAY)
+
+def update():
+    panel.x = (panel.x + random.randint(0, dx)) % width
+    panel.y = (panel.y + random.randint(0, dx)) % height
+
+panel.add_children([text, text2])
+window = dsl.Window(width, height, "Hello, World!", panel)
+window.update_fn = update
+window.render()
+
+```
+
+---
 # Assignment
 
 - **Goal**: Develop bindings between two different platforms, such as:

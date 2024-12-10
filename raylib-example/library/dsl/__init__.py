@@ -8,7 +8,7 @@ from library.native.core_functions import init_window, close_window, window_shou
 class Node:
     """
     Base class for all nodes in the DSL
-    This a renderable node, which can contains other nodes
+    This a renderable node, which can contain other nodes
     """
 
     def __init__(self, x: int, y: int):
@@ -24,19 +24,22 @@ class Node:
             raise Exception("Node already has a parent")
         self.parent_node = parent
 
+    @property
     def layout_x(self):
         if self.parent_node is None:
             return self.x
-        return self.parent_node.layout_x() + self.x
+        return self.parent_node.layout_x + self.x
 
+    @property
     def layout_y(self):
         if self.parent_node is None:
             return self.y
-        return self.parent_node.layout_y() + self.y
+        return self.parent_node.layout_y + self.y
+        
     def render(self):
         pass
 
-    def add_child(self, text2):
+    def add_children(self):
         pass
 
 
@@ -47,16 +50,14 @@ class Text(Node):
 
     def __init__(self, text: string, x: int, y: int, font_size: int, color: Color):
         super().__init__(x, y)
-        # covert text to string to byte
+        # convert text to bytes
         self.text = text.encode()
-        self.x = x
-        self.y = y
         self.font_size = font_size
         self.parent_node = Node
         self.color = color
 
     def render(self):
-        draw_text(self.text, self.layout_x(), self.layout_y(), self.font_size, self.color)
+        draw_text(self.text, self.layout_x, self.layout_y, self.font_size, self.color)
 
     def add_parent(self, parent):
         self.parent_node = parent
@@ -75,15 +76,16 @@ class Panel(Node):
         self.y = y
         self.children = []
 
-    def add_child(self, child) -> Node:
-        self.children.append(child)
-        child.add_parent(self)
-        return self
-
+    def add_children(self, children):
+        for child in children:
+            child.add_parent(self)
+            self.children.append(child)
+       
     def render(self):
-        # get parent
         for child in self.children:
             child.render()
+
+
 class Window:
     """
     A window node, which can contain other nodes
@@ -96,16 +98,13 @@ class Window:
         self.update_fn = None
         self.panel = root
 
-    def add_child(self, child):
-        self.panel.add_child(child)
-
     def set_update_fn(self, fn):
         self.update_fn = fn
+        
     def render(self):
         init_window(self.width, self.height, self.title)
         set_target_fps(60)
         while not window_should_close():
-            # clear background
             begin_drawing()
             clear_background(WHITE)
             self.update_fn()
