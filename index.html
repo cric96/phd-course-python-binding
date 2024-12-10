@@ -272,35 +272,35 @@ result = cmult(<span class="hljs-number">2</span>, <span class="hljs-number">3.1
 <p>You can also wrap C structs in Python</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> {</span>
     <span class="hljs-type">int</span> x;
-    <span class="hljs-type">float</span> y;
+    <span class="hljs-type">int</span> y;
 } Point;
 </code></pre>
 <p>In python you can define the struct like this:</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Point</span>(ctypes.Structure):
-    _fields_ = [(<span class="hljs-string">&#x27;x&#x27;</span>, ctypes.c_int), (<span class="hljs-string">&#x27;y&#x27;</span>, ctypes.c_float)]
+    _fields_ = [(<span class="hljs-string">&#x27;x&#x27;</span>, ctypes.c_int), (<span class="hljs-string">&#x27;y&#x27;</span>, ctypes.c_int)]
 </code></pre>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16">
 <h1>Pass structs to functions</h1>
 <p>You can pass structs to C functions</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">move_point</span><span class="hljs-params">(Point p, <span class="hljs-type">int</span> dx, <span class="hljs-type">float</span> dy)</span> {
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">move_point</span><span class="hljs-params">(Point p, <span class="hljs-type">int</span> dx, <span class="hljs-type">int</span> dy)</span> {
     p.x += dx;
     p.y += dy;
 }
 </code></pre>
 <p>In Python you can call it like this:</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">move_point = lib.move_point
-move_point.argtypes = [Point, ctypes.c_int, ctypes.c_float]
+move_point.argtypes = [Point, ctypes.c_int, ctypes.c_int]
 move_point.restype = <span class="hljs-literal">None</span>
 
-p = Point(<span class="hljs-number">1</span>, <span class="hljs-number">2.0</span>)
-move_point(p, <span class="hljs-number">3</span>, <span class="hljs-number">4.0</span>)
+p = Point(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+move_point(p, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>)
 </code></pre>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17">
 <h1>Pass pointer to functions</h1>
 <p>You can also pass pointers to C functions</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">move_point</span><span class="hljs-params">(Point *p, <span class="hljs-type">int</span> dx, <span class="hljs-type">float</span> dy)</span> {
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">move_point</span><span class="hljs-params">(Point *p, <span class="hljs-type">int</span> dx, <span class="hljs-type">int</span> dy)</span> {
     p-&gt;x += dx;
     p-&gt;y += dy;
 }
@@ -309,8 +309,8 @@ move_point(p, <span class="hljs-number">3</span>, <span class="hljs-number">4.0<
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">move_point = lib.move_point
 move_point.argtypes = [ctypes.POINTER(Point), ctypes.c_int, ctypes.c_float]
 move_point.restype = <span class="hljs-literal">None</span>
-point = Point(<span class="hljs-number">1</span>, <span class="hljs-number">2.0</span>)
-move_point(ctypes.byref(point), <span class="hljs-number">3</span>, <span class="hljs-number">4.0</span>)
+point = Point(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+move_point(ctypes.byref(point), <span class="hljs-number">3</span>, <span class="hljs-number">4</span>)
 </code></pre>
 <p><img class="emoji" draggable="false" alt="❗" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2757.svg" data-marp-twemoji=""/> it is important to use <code>ctypes.byref</code> to pass a pointer to the struct <img class="emoji" draggable="false" alt="❗" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2757.svg" data-marp-twemoji=""/></p>
 </section>
