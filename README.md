@@ -211,13 +211,13 @@ You can also wrap C structs in Python
 ```c
 typedef struct {
     int x;
-    float y;
+    int y;
 } Point;
 ```
 In python you can define the struct like this:
 ```python
 class Point(ctypes.Structure):
-    _fields_ = [('x', ctypes.c_int), ('y', ctypes.c_float)]
+    _fields_ = [('x', ctypes.c_int), ('y', ctypes.c_int)]
 ```
 
 ---
@@ -226,7 +226,7 @@ class Point(ctypes.Structure):
 
 You can pass structs to C functions
 ```c
-void move_point(Point p, int dx, float dy) {
+void move_point(Point p, int dx, int dy) {
     p.x += dx;
     p.y += dy;
 }
@@ -235,11 +235,11 @@ void move_point(Point p, int dx, float dy) {
 In Python you can call it like this:
 ```python
 move_point = lib.move_point
-move_point.argtypes = [Point, ctypes.c_int, ctypes.c_float]
+move_point.argtypes = [Point, ctypes.c_int, ctypes.c_int]
 move_point.restype = None
 
-p = Point(1, 2.0)
-move_point(p, 3, 4.0)
+p = Point(1, 2)
+move_point(p, 3, 4)
 ```
 
 ---
@@ -248,7 +248,7 @@ move_point(p, 3, 4.0)
 
 You can also pass pointers to C functions
 ```c
-void move_point(Point *p, int dx, float dy) {
+void move_point(Point *p, int dx, int dy) {
     p->x += dx;
     p->y += dy;
 }
@@ -259,8 +259,8 @@ In Python you can call it like this:
 move_point = lib.move_point
 move_point.argtypes = [ctypes.POINTER(Point), ctypes.c_int, ctypes.c_float]
 move_point.restype = None
-point = Point(1, 2.0)
-move_point(ctypes.byref(point), 3, 4.0)
+point = Point(1, 2)
+move_point(ctypes.byref(point), 3, 4)
 ```
 :exclamation: it is important to use `ctypes.byref` to pass a pointer to the struct :exclamation:
 
@@ -278,8 +278,6 @@ void free_point(Point *p) {
     free(p);
 }
 ```
-
-
 
 ---
 

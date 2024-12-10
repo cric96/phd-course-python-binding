@@ -22,7 +22,7 @@ move.restype = Point
 point = Point(5, 6)
 moved = move(point, 10, 20)
 print("The result of translating (5, 6) by (10, 20) is: ", moved.x, moved.y)
-
+print("The original point is: ", point.x, point.y)
 # Move point pointer
 move_pointer = lib.move_pointer
 move_pointer.argtypes = [ctypes.POINTER(Point), ctypes.c_int, ctypes.c_int]
