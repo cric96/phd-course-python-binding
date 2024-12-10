@@ -116,6 +116,7 @@ Python offers several ways to create bindings with native code, from completely 
     - Wrap input for C functions (marshalling)
     - Wrap output from C functions (unmarshalling)
 
+
 ---
 
 # How to run
@@ -262,6 +263,22 @@ point = Point(1, 2.0)
 move_point(ctypes.byref(point), 3, 4.0)
 ```
 :exclamation: it is important to use `ctypes.byref` to pass a pointer to the struct :exclamation:
+
+---
+
+# On Memory Management
+- The type definitions created via `ctypes` are **managed** by Python
+- When the object is no longer needed, Python will automatically free the memory
+- However, if a C function allocates memory, you need to free it manually
+    - Otherwise, you will have a memory leak
+
+- Typical solution: expose a function to free the memory
+```c
+void free_point(Point *p) {
+    free(p);
+}
+```
+
 
 
 ---
