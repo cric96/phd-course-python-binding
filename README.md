@@ -132,7 +132,7 @@ pip install -r requirements.txt
 ```
 - Build the shared library
 ```bash
-invoke build-libray
+invoke build-library
 ```
 - Run the Python script
 ```bash
